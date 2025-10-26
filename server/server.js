@@ -10,7 +10,7 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 // CORS configuration for production
 const corsOptions = {
     origin: NODE_ENV === 'production'
-        ? ['https://reporadar.vercel.app', 'https://reporadar.onrender.com'] // Add your production URLs here
+        ? ['https://vintaclectic.github.io', 'https://reporadar.vercel.app', 'https://reporadar.onrender.com']
         : ['http://localhost:5500', 'http://127.0.0.1:5500'],
     credentials: true,
     optionsSuccessStatus: 200
