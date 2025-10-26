@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RepoRadar - Discover GitHub Repositories Intelligently</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 RepoRadar</h1>
+            <p class="tagline">Discover GitHub repositories with AI-powered intelligence</p>
+            <button class="settings-btn" onclick="toggleSettings()" title="Settings">⚙️</button>
+        </div>
+
+        <!-- Settings Modal -->
+        <div id="settingsModal" class="settings-modal" style="display: none;">
+            <div class="settings-content">
+                <div class="settings-header">
+                    <h2>⚙️ Settings</h2>
+                    <button class="close-btn" onclick="toggleSettings()">✕</button>
+                </div>
+
+                <div class="settings-body">
+                    <div class="setting-group">
+                        <h3>🔑 GitHub API Token</h3>
+                        <p class="setting-description">
+                            Add your GitHub Personal Access Token to increase rate limits from 60 to 5,000 requests/hour.
+                            <a href="https://github.com/settings/tokens" target="_blank" class="help-link">Get Token</a>
+                        </p>
+                        <input
+                            type="password"
+                            id="apiTokenInput"
+                            class="token-input"
+                            placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"
+                        >
+                        <div class="setting-actions">
+                            <button class="save-btn" onclick="saveApiToken()">💾 Save Token</button>
+                            <button class="clear-btn" onclick="clearApiToken()">🗑️ Clear Token</button>
+                        </div>
+                        <div id="tokenStatus" class="token-status"></div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>📊 Rate Limit Status</h3>
+                        <div id="rateLimitInfo" class="rate-limit-info">
+                            <p>Search to check your current rate limit</p>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <h3>📝 How to Create a Classic GitHub Token</h3>
+                        <div class="token-instructions">
+                            <ol class="token-steps">
+                                <li>Go to <a href="https://github.com/settings/tokens" target="_blank" class="help-link">GitHub Settings → Tokens (classic)</a></li>
+                                <li>Click <strong>"Generate new token"</strong> → <strong>"Generate new token (classic)"</strong></li>
+                                <li>Give your token a descriptive name (e.g., "RepoRadar App")</li>
+                                <li>Select the following scopes:
+                                    <ul class="scope-list">
+                                        <li><strong>public_repo</strong> - Star public repositories</li>
+                                        <li><strong>notifications</strong> - Watch/subscribe to repositories</li>
+                                        <li><strong>user:follow</strong> - Follow/unfollow users</li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>"Generate token"</strong> at the bottom</li>
+                                <li>Copy the token (starts with <code>ghp_</code>) and paste it above</li>
+                            </ol>
+                            <p class="token-warning">⚠️ <strong>Important:</strong> Copy your token immediately! GitHub only shows it once.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="search-section">
+            <div class="search-box">
+                <input
+                    type="text"
+                    id="searchInput"
+                    class="search-input"
+                    placeholder="What are you looking for? (e.g., 'open directory indexer', 'machine learning toolkit')"
+                    onkeypress="if(event.key==='Enter') searchRepos()"
+                >
+                <button class="search-btn" onclick="searchRepos()">🔍 Search</button>
+            </div>
+
+            <div class="filters-row">
+                <div class="filters">
+                    <div class="language-filter-dropdown">
+                        <button class="filter-btn" onclick="toggleLanguageFilter(event)" id="languageFilterBtn">
+                            🔤 Language <span class="dropdown-arrow">▼</span>
+                        </button>
+                        <div class="language-dropdown-menu" id="languageDropdown">
+                            <div class="language-search-box">
+                                <input type="text" id="languageSearch" placeholder="Search languages..." class="language-search-input" onkeyup="filterLanguageList()">
+                            </div>
+                            <div id="languageList" class="language-list">
+                                <div class="language-item">Search for repositories to see available languages</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="filter-btn" onclick="toggleFilter('stars')">⭐ Most Stars</button>
+                    <button class="filter-btn" onclick="toggleFilter('recent')">🕒 Recent</button>
+                    <button class="filter-btn" onclick="toggleFilter('active')">🔥 Most Active</button>
+                </div>
+                <div class="results-per-page">
+                    <label for="perPageSelect">Results per page:</label>
+                    <select id="perPageSelect" onchange="changeResultsPerPage()" class="per-page-select">
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="loadingDiv" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Scanning GitHub universe...</p>
+        </div>
+
+        <div id="resultsDiv" class="results"></div>
+
+        <div id="paginationDiv" class="pagination" style="display: none;"></div>
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button id="scrollTopBtn" class="scroll-top-btn" onclick="scrollToTop()" style="display: none;" title="Back to top">
+        ↑
+    </button>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="auth-modal" style="display: none;">
+        <div class="auth-content">
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form">
+                <h2>Login to RepoRadar</h2>
+                <p class="auth-subtitle">Access your saved GitHub token from anywhere</p>
+
+                <input type="text" id="loginIdentifier" placeholder="Username or Email" class="auth-input">
+                <input type="password" id="loginPassword" placeholder="Password" class="auth-input">
+
+                <button class="auth-btn" onclick="login()">Login</button>
+                <div id="loginStatus" class="auth-status"></div>
+
+                <p class="auth-switch">
+                    Don't have an account? <a href="javascript:void(0)" onclick="switchToSignup()">Sign up</a>
+                </p>
+            </div>
+
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-form" style="display: none;">
+                <h2>Create Account</h2>
+                <p class="auth-subtitle">Save your GitHub token permanently</p>
+
+                <input type="text" id="signupUsername" placeholder="Username" class="auth-input">
+                <input type="email" id="signupEmail" placeholder="Email" class="auth-input">
+                <input type="password" id="signupPassword" placeholder="Password (6+ characters)" class="auth-input">
+
+                <button class="auth-btn" onclick="register()">Sign Up</button>
+                <div id="signupStatus" class="auth-status"></div>
+
+                <p class="auth-switch">
+                    Already have an account? <a href="javascript:void(0)" onclick="switchToLogin()">Login</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Info Display -->
+    <div id="userInfo" class="user-info" style="display: none;"></div>
+
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        // Load session on page load - BEFORE app.js loads token
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSession();
+        });
+    </script>
+</body>
+</html>

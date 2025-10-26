@@ -1,0 +1,72 @@
+MIT License
+
+Copyright (c) 2025 RepoRadar
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+ADDITIONAL TERMS:
+
+1. ATTRIBUTION
+   While not legally required, we appreciate attribution when you use, modify,
+   or redistribute this software. A link back to the original project is
+   appreciated but not mandatory.
+
+2. GITHUB API COMPLIANCE
+   This software uses GitHub's API. Users must comply with GitHub's Terms of
+   Service and API usage policies. The authors are not responsible for any
+   violations of GitHub's terms by users of this software.
+
+3. THIRD-PARTY SERVICES
+   This software may integrate with third-party services (GitHub API, OpenAI,
+   analytics services, etc.). Users are responsible for obtaining proper
+   licenses and complying with terms of service for any third-party services
+   they use in conjunction with this software.
+
+4. NO WARRANTY
+   This software is provided "as is" without warranty of any kind. The authors
+   make no guarantees about its functionality, security, or suitability for
+   any particular purpose.
+
+5. RATE LIMITING
+   Users are responsible for managing their own GitHub API rate limits and
+   ensuring they do not exceed GitHub's rate limit policies.
+
+6. DATA PRIVACY
+   If you collect user data through a deployment of this software, you are
+   responsible for complying with applicable data protection laws (GDPR,
+   CCPA, etc.) and providing appropriate privacy policies.
+
+---
+
+CREDITS:
+
+This project uses the following technologies and services:
+- GitHub GraphQL API (GitHub, Inc.)
+- Tailwind CSS (Tailwind Labs, Inc.)
+- Inter Font (The Inter Project Authors)
+- Various open-source libraries and tools
+
+Special thanks to the open-source community for making projects like this
+possible.
+
+---
+
+For questions about licensing, please open an issue on the GitHub repository.

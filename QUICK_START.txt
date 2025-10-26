@@ -1,0 +1,57 @@
+═══════════════════════════════════════════════════════════════
+   🚀 REPORADAR - DEPLOYMENT QUICK START CARD
+═══════════════════════════════════════════════════════════════
+
+📋 WHAT YOU NEED:
+  ✓ GitHub account (for code hosting)
+  ✓ Render account (for backend - FREE)
+  ✓ Vercel account (for frontend - FREE)
+  ⏱️ Total time: ~25 minutes
+
+═══════════════════════════════════════════════════════════════
+
+🔢 THE 6 STEPS:
+
+1️⃣  PUSH CODE TO GITHUB
+    └─ git add . && git commit -m "Deploy" && git push
+
+2️⃣  DEPLOY BACKEND (Render.com)
+    └─ Sign up → New Web Service → Connect repo
+    └─ Settings: npm install | node server/server.js
+    └─ Add ENV: PORT=10000, NODE_ENV=production
+
+3️⃣  UPDATE FRONTEND
+    └─ Copy Render URL
+    └─ Edit src/js/auth.js line 8
+    └─ Push to GitHub
+
+4️⃣  DEPLOY FRONTEND (Vercel)
+    └─ npm install -g vercel
+    └─ cd src && vercel --prod
+
+5️⃣  UPDATE CORS
+    └─ Edit server/server.js line 13
+    └─ Add your Vercel URL
+    └─ Push to GitHub
+
+6️⃣  TEST!
+    └─ Visit your Vercel URL
+    └─ Sign up → Login → Save token
+
+═══════════════════════════════════════════════════════════════
+
+📍 YOUR URLS AFTER DEPLOYMENT:
+
+  Backend:  https://reporadar-xxx.onrender.com
+  Frontend: https://reporadar.vercel.app
+
+═══════════════════════════════════════════════════════════════
+
+⚡ START NOW:
+
+Step 1: Run this command:
+$ git status
+
+Step 2: Read STEP_BY_STEP_DEPLOY.md for detailed walkthrough
+
+═══════════════════════════════════════════════════════════════

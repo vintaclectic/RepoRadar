@@ -1,0 +1,42 @@
+{
+  "name": "reporadar",
+  "version": "1.0.0",
+  "description": "RepoRadar - Enhanced GitHub Repository Search with AI-powered intelligence",
+  "main": "src/index.html",
+  "scripts": {
+    "dev": "live-server src --port=5500 --host=localhost",
+    "build": "npm run build:html && npm run build:css && npm run build:js",
+    "build:html": "cp src/index.html dist/",
+    "build:css": "cp src/css/style.css dist/css/",
+    "build:js": "cp src/js/app.js dist/js/",
+    "serve": "live-server dist --port=8080",
+    "start": "npm run dev",
+    "server": "node server/server.js",
+    "server:dev": "nodemon server/server.js"
+  },
+  "keywords": [
+    "github",
+    "search",
+    "repository",
+    "radar",
+    "api",
+    "javascript",
+    "frontend"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "nodemon": "^3.1.10"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/reporadar.git"
+  }
+}
