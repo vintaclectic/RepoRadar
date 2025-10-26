@@ -9,9 +9,29 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // CORS configuration for production
 const corsOptions = {
-    origin: NODE_ENV === 'production'
-        ? ['https://vintaclectic.github.io', 'https://reporadar.vercel.app', 'https://reporadar.onrender.com']
-        : ['http://localhost:5500', 'http://127.0.0.1:5500'],
+    origin: function (origin, callback) {
+        const allowedOrigins = [
+            'https://vintaclectic.github.io',
+            'https://reporadar.vercel.app',
+            'https://reporadar.onrender.com',
+            'http://localhost:5500',
+            'http://127.0.0.1:5500'
+        ];
+
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+
+        // Check if origin starts with allowed GitHub Pages domain
+        if (origin.startsWith('https://vintaclectic.github.io')) {
+            return callback(null, true);
+        }
+
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     optionsSuccessStatus: 200
 };
