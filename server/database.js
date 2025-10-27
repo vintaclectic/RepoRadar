@@ -88,17 +88,21 @@ const sessionDB = {
         return new Promise((resolve, reject) => {
             const expiresAt = new Date();
             expiresAt.setDate(expiresAt.getDate() + days);
+            // Convert to Unix timestamp (seconds) for reliable comparison
+            const expiresAtUnix = Math.floor(expiresAt.getTime() / 1000);
             db.run('INSERT INTO sessions (user_id, session_token, expires_at) VALUES (?, ?, ?)',
-                [userId, sessionToken, expiresAt.toISOString()],
+                [userId, sessionToken, expiresAtUnix],
                 (err) => err ? reject(err) : resolve({ sessionToken, expiresAt }));
         });
     },
     validateSession: (sessionToken) => {
         return new Promise((resolve, reject) => {
+            // Use Unix timestamp comparison for reliability
+            const nowUnix = Math.floor(Date.now() / 1000);
             db.get(`SELECT s.*, u.id as user_id, u.username, u.email FROM sessions s
                 JOIN users u ON s.user_id = u.id
-                WHERE s.session_token = ? AND s.expires_at > datetime('now')`,
-                [sessionToken], (err, row) => err ? reject(err) : resolve(row));
+                WHERE s.session_token = ? AND s.expires_at > ?`,
+                [sessionToken, nowUnix], (err, row) => err ? reject(err) : resolve(row));
         });
     },
     deleteSession: (sessionToken) => {
@@ -106,7 +110,38 @@ const sessionDB = {
             db.run('DELETE FROM sessions WHERE session_token = ?',
                 [sessionToken], (err) => err ? reject(err) : resolve());
         });
+    },
+    cleanupExpiredSessions: () => {
+        return new Promise((resolve, reject) => {
+            const nowUnix = Math.floor(Date.now() / 1000);
+            db.run('DELETE FROM sessions WHERE expires_at < ? OR expires_at IS NULL',
+                [nowUnix], function(err) {
+                    if (err) reject(err);
+                    else {
+                        console.log(`Cleaned up ${this.changes} expired sessions`);
+                        resolve(this.changes);
+                    }
+                });
+        });
+    },
+    // Clean up sessions with invalid datetime format (migration helper)
+    cleanupInvalidSessions: () => {
+        return new Promise((resolve, reject) => {
+            // Delete sessions where expires_at is not a valid Unix timestamp (i.e., contains non-numeric characters)
+            db.run("DELETE FROM sessions WHERE typeof(expires_at) != 'integer'",
+                [], function(err) {
+                    if (err) reject(err);
+                    else {
+                        console.log(`Cleaned up ${this.changes} invalid format sessions`);
+                        resolve(this.changes);
+                    }
+                });
+        });
     }
 };
+
+// Run cleanup on server start
+sessionDB.cleanupInvalidSessions().catch(err => console.error('Session cleanup error:', err));
+sessionDB.cleanupExpiredSessions().catch(err => console.error('Session cleanup error:', err));
 
 module.exports = { db, userDB, tokenDB, sessionDB };

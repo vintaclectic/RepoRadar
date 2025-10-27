@@ -46,14 +46,22 @@ function generateSessionToken() {
 
 async function authenticate(req, res, next) {
     const sessionToken = req.headers['x-session-token'];
-    if (!sessionToken) return res.status(401).json({ error: 'No session token provided' });
-    
+    if (!sessionToken) {
+        console.log('❌ Auth failed: No session token provided');
+        return res.status(401).json({ error: 'No session token provided' });
+    }
+
     try {
         const session = await sessionDB.validateSession(sessionToken);
-        if (!session) return res.status(401).json({ error: 'Invalid or expired session' });
+        if (!session) {
+            console.log('❌ Auth failed: Invalid or expired session for token:', sessionToken.substring(0, 10) + '...');
+            return res.status(401).json({ error: 'Invalid or expired session' });
+        }
+        console.log('✅ Auth success: User', session.username, 'authenticated');
         req.user = { id: session.user_id, username: session.username, email: session.email };
         next();
     } catch (error) {
+        console.error('❌ Auth error:', error);
         res.status(500).json({ error: 'Authentication failed' });
     }
 }
@@ -62,20 +70,25 @@ async function authenticate(req, res, next) {
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { username, email, password } = req.body;
+        console.log('📝 Registration attempt:', username, email);
+
         if (!username || !email || !password) return res.status(400).json({ error: 'All fields required' });
         if (username.length < 3) return res.status(400).json({ error: 'Username must be 3+ characters' });
         if (password.length < 6) return res.status(400).json({ error: 'Password must be 6+ characters' });
-        
+
         const user = await userDB.createUser(username, email, password);
         const sessionToken = generateSessionToken();
         await sessionDB.createSession(user.id, sessionToken);
-        
+
+        console.log('✅ User registered successfully:', username, 'Session token:', sessionToken.substring(0, 10) + '...');
+
         res.status(201).json({
             message: 'User registered successfully',
             user: { id: user.id, username: user.username, email: user.email },
             sessionToken
         });
     } catch (error) {
+        console.error('❌ Registration error:', error.message);
         res.status(error.message.includes('already exists') ? 409 : 500).json({ error: error.message });
     }
 });
@@ -83,22 +96,39 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { identifier, password } = req.body;
-        if (!identifier || !password) return res.status(400).json({ error: 'Credentials required' });
-        
+        console.log('🔐 Login attempt:', identifier);
+
+        if (!identifier || !password) {
+            console.log('❌ Login failed: Missing credentials');
+            return res.status(400).json({ error: 'Credentials required' });
+        }
+
         const user = await userDB.findUser(identifier);
-        if (!user || !userDB.verifyPassword(password, user.password_hash)) {
+        if (!user) {
+            console.log('❌ Login failed: User not found:', identifier);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-        
+
+        const passwordValid = userDB.verifyPassword(password, user.password_hash);
+        console.log('🔑 Password validation:', passwordValid ? 'SUCCESS' : 'FAILED');
+
+        if (!passwordValid) {
+            console.log('❌ Login failed: Invalid password for user:', user.username);
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
         const sessionToken = generateSessionToken();
         await sessionDB.createSession(user.id, sessionToken);
-        
+
+        console.log('✅ Login successful:', user.username, 'Session token:', sessionToken.substring(0, 10) + '...');
+
         res.json({
             message: 'Login successful',
             user: { id: user.id, username: user.username, email: user.email },
             sessionToken
         });
     } catch (error) {
+        console.error('❌ Login error:', error);
         res.status(500).json({ error: 'Login failed' });
     }
 });
