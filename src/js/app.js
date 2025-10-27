@@ -1197,6 +1197,8 @@ function adjustDropdownPosition(dropdown) {
     const dropdownHeight = dropdownRect.height;
 
     const wouldOverflowBottom = dropdownRect.bottom > viewportHeight - 20;
+    const hasEnoughSpaceAbove = spaceAbove > dropdownHeight + 40;
+    const preferUpward = spaceAbove > spaceBelow * 1.5; // Prefer upward if 1.5x more space above
 
     console.log('📊 Dropdown Analysis:');
     console.log(`  Height: ${dropdownHeight}px`);
@@ -1205,14 +1207,17 @@ function adjustDropdownPosition(dropdown) {
     console.log(`  Viewport height: ${viewportHeight}px`);
     console.log(`  Dropdown bottom: ${dropdownRect.bottom}px`);
     console.log(`  Would overflow: ${wouldOverflowBottom}`);
-    console.log(`  Enough space above: ${spaceAbove > dropdownHeight + 40}`);
+    console.log(`  Enough space above: ${hasEnoughSpaceAbove}`);
+    console.log(`  Prefer upward (1.5x more space): ${preferUpward}`);
 
-    // If it overflows AND there's more space above, position it upward
-    if (wouldOverflowBottom && spaceAbove > dropdownHeight + 40) {
+    // Position upward if:
+    // 1. Would overflow bottom AND enough space above, OR
+    // 2. Significantly more space above than below (prefer upward positioning)
+    if ((wouldOverflowBottom && hasEnoughSpaceAbove) || (preferUpward && hasEnoughSpaceAbove)) {
         console.log('✅ Positioning dropdown UPWARD');
         dropdown.classList.add('dropdown-up');
     } else {
-        console.log('⬇️ Keeping dropdown DOWNWARD (overflow=' + wouldOverflowBottom + ', spaceCheck=' + (spaceAbove > dropdownHeight + 40) + ')');
+        console.log('⬇️ Keeping dropdown DOWNWARD');
     }
 }
 
