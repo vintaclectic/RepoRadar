@@ -50,6 +50,37 @@ app.get('/api/health', (req, res) => {
     });
 });
 
+// Debug endpoint to check user data (authenticated)
+app.get('/api/debug/me', authenticate, async (req, res) => {
+    try {
+        const tokenData = await tokenDB.getToken(req.user.id);
+        const { db } = require('./database');
+
+        db.get('SELECT COUNT(*) as count FROM sessions WHERE user_id = ?', [req.user.id], (err, sessionCount) => {
+            if (err) {
+                return res.status(500).json({ error: 'Database query failed' });
+            }
+
+            res.json({
+                user: {
+                    id: req.user.id,
+                    username: req.user.username,
+                    email: req.user.email
+                },
+                token: {
+                    exists: !!tokenData,
+                    tokenPreview: tokenData ? tokenData.token.substring(0, 10) + '...' : null
+                },
+                sessions: {
+                    activeCount: sessionCount.count
+                }
+            });
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch user data' });
+    }
+});
+
 function generateSessionToken() {
     return crypto.randomBytes(32).toString('hex');
 }
