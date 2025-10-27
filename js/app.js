@@ -1022,6 +1022,12 @@ function toggleCodeDropdown(event, repoId) {
     const dropdown = document.getElementById(`code-${repoId}`);
     closeAllDropdowns(dropdown);
     dropdown.classList.toggle('show');
+
+    // Adjust dropdown position if it's being shown
+    if (dropdown.classList.contains('show')) {
+        // Small delay to allow browser to render dropdown first
+        setTimeout(() => adjustDropdownPosition(dropdown), 10);
+    }
 }
 
 function copyCloneUrl(event, repoId) {
@@ -1075,6 +1081,9 @@ async function toggleReleasesDropdown(event, repoId) {
     if (!dropdown.classList.contains('show')) {
         dropdown.classList.add('show');
 
+        // Adjust dropdown position after showing
+        setTimeout(() => adjustDropdownPosition(dropdown), 10);
+
         // Load releases if not cached
         if (!releasesCache[`${owner}/${repo}`]) {
             try {
@@ -1093,11 +1102,18 @@ async function toggleReleasesDropdown(event, repoId) {
                 releasesCache[`${owner}/${repo}`] = releases;
 
                 displayReleases(dropdown, releases, owner, repo);
+
+                // Re-adjust position after content loads
+                setTimeout(() => adjustDropdownPosition(dropdown), 10);
             } catch (error) {
                 dropdown.innerHTML = '<div class="dropdown-item">No releases available</div>';
+                // Re-adjust position after error content loads
+                setTimeout(() => adjustDropdownPosition(dropdown), 10);
             }
         } else {
             displayReleases(dropdown, releasesCache[`${owner}/${repo}`], owner, repo);
+            // Re-adjust position after cached content loads
+            setTimeout(() => adjustDropdownPosition(dropdown), 10);
         }
     } else {
         dropdown.classList.remove('show');
@@ -1156,6 +1172,34 @@ function closeAllDropdowns(except = null) {
             dropdown.classList.remove('show');
         }
     });
+}
+
+// Helper function to adjust dropdown position based on viewport
+function adjustDropdownPosition(dropdown) {
+    // Remove dropdown-up class first to get accurate measurements
+    dropdown.classList.remove('dropdown-up');
+
+    // Get dropdown position and dimensions
+    const dropdownRect = dropdown.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+
+    // Calculate if dropdown would extend beyond viewport bottom
+    const wouldOverflowBottom = dropdownRect.bottom > viewportHeight - 20; // 20px buffer
+
+    // If it would overflow, check if there's enough space above
+    if (wouldOverflowBottom) {
+        const parentButton = dropdown.closest('.action-dropdown');
+        if (parentButton) {
+            const buttonRect = parentButton.getBoundingClientRect();
+            const spaceAbove = buttonRect.top;
+            const dropdownHeight = dropdownRect.height;
+
+            // Only use dropdown-up if there's enough space above
+            if (spaceAbove > dropdownHeight + 20) {
+                dropdown.classList.add('dropdown-up');
+            }
+        }
+    }
 }
 
 // Score breakdown popup
@@ -1413,6 +1457,12 @@ function togglePreviewDropdown(event, repoId) {
     const dropdown = document.getElementById(`preview-${repoId}`);
     closeAllDropdowns(dropdown);
     dropdown.classList.toggle('show');
+
+    // Adjust dropdown position if it's being shown
+    if (dropdown.classList.contains('show')) {
+        // Small delay to allow browser to render dropdown first
+        setTimeout(() => adjustDropdownPosition(dropdown), 10);
+    }
 }
 
 function openInCodeSandbox(event, repoId, embed = false) {

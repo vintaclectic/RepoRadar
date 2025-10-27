@@ -1040,6 +1040,12 @@ body {
     animation: dropdownSlide 0.2s ease-out;
 }
 
+.dropdown-menu.dropdown-up {
+    top: auto;
+    bottom: calc(100% + 5px);
+    animation: dropdownSlideUp 0.2s ease-out;
+}
+
 .dropdown-menu.show {
     display: block;
 }
@@ -1048,6 +1054,17 @@ body {
     from {
         opacity: 0;
         transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes dropdownSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
     to {
         opacity: 1;
