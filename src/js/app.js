@@ -1176,29 +1176,44 @@ function closeAllDropdowns(except = null) {
 
 // Helper function to adjust dropdown position based on viewport
 function adjustDropdownPosition(dropdown) {
-    // Remove dropdown-up class first to get accurate measurements
+    // Always start with dropdown-up removed to get accurate measurements
     dropdown.classList.remove('dropdown-up');
+
+    // Force a reflow to ensure measurements are accurate
+    dropdown.offsetHeight;
 
     // Get dropdown position and dimensions
     const dropdownRect = dropdown.getBoundingClientRect();
     const viewportHeight = window.innerHeight;
+    const parentButton = dropdown.closest('.action-dropdown');
 
-    // Calculate if dropdown would extend beyond viewport bottom
-    const wouldOverflowBottom = dropdownRect.bottom > viewportHeight - 20; // 20px buffer
+    if (!parentButton) return;
 
-    // If it would overflow, check if there's enough space above
-    if (wouldOverflowBottom) {
-        const parentButton = dropdown.closest('.action-dropdown');
-        if (parentButton) {
-            const buttonRect = parentButton.getBoundingClientRect();
-            const spaceAbove = buttonRect.top;
-            const dropdownHeight = dropdownRect.height;
+    const buttonRect = parentButton.getBoundingClientRect();
 
-            // Only use dropdown-up if there's enough space above
-            if (spaceAbove > dropdownHeight + 20) {
-                dropdown.classList.add('dropdown-up');
-            }
-        }
+    // Calculate space above and below the button
+    const spaceAbove = buttonRect.top;
+    const spaceBelow = viewportHeight - buttonRect.bottom;
+    const dropdownHeight = dropdownRect.height;
+
+    console.log('Dropdown positioning:', {
+        dropdownHeight,
+        spaceAbove,
+        spaceBelow,
+        viewportHeight,
+        dropdownBottom: dropdownRect.bottom,
+        wouldOverflow: dropdownRect.bottom > viewportHeight - 20
+    });
+
+    // Check if dropdown would overflow bottom of viewport
+    const wouldOverflowBottom = dropdownRect.bottom > viewportHeight - 20;
+
+    // If it overflows AND there's more space above, position it upward
+    if (wouldOverflowBottom && spaceAbove > dropdownHeight + 40) {
+        console.log('✅ Positioning dropdown UPWARD');
+        dropdown.classList.add('dropdown-up');
+    } else {
+        console.log('⬇️ Keeping dropdown DOWNWARD');
     }
 }
 
