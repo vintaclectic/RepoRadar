@@ -40,6 +40,16 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.static('src'));
 
+// Version/health endpoint
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'ok',
+        version: '2.0.0-session-fix',
+        timestamp: new Date().toISOString(),
+        sessionFormat: 'unix-timestamp'
+    });
+});
+
 function generateSessionToken() {
     return crypto.randomBytes(32).toString('hex');
 }
