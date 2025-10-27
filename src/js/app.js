@@ -1196,24 +1196,23 @@ function adjustDropdownPosition(dropdown) {
     const spaceBelow = viewportHeight - buttonRect.bottom;
     const dropdownHeight = dropdownRect.height;
 
-    console.log('Dropdown positioning:', {
-        dropdownHeight,
-        spaceAbove,
-        spaceBelow,
-        viewportHeight,
-        dropdownBottom: dropdownRect.bottom,
-        wouldOverflow: dropdownRect.bottom > viewportHeight - 20
-    });
-
-    // Check if dropdown would overflow bottom of viewport
     const wouldOverflowBottom = dropdownRect.bottom > viewportHeight - 20;
+
+    console.log('📊 Dropdown Analysis:');
+    console.log(`  Height: ${dropdownHeight}px`);
+    console.log(`  Space above: ${spaceAbove}px`);
+    console.log(`  Space below: ${spaceBelow}px`);
+    console.log(`  Viewport height: ${viewportHeight}px`);
+    console.log(`  Dropdown bottom: ${dropdownRect.bottom}px`);
+    console.log(`  Would overflow: ${wouldOverflowBottom}`);
+    console.log(`  Enough space above: ${spaceAbove > dropdownHeight + 40}`);
 
     // If it overflows AND there's more space above, position it upward
     if (wouldOverflowBottom && spaceAbove > dropdownHeight + 40) {
         console.log('✅ Positioning dropdown UPWARD');
         dropdown.classList.add('dropdown-up');
     } else {
-        console.log('⬇️ Keeping dropdown DOWNWARD');
+        console.log('⬇️ Keeping dropdown DOWNWARD (overflow=' + wouldOverflowBottom + ', spaceCheck=' + (spaceAbove > dropdownHeight + 40) + ')');
     }
 }
 
