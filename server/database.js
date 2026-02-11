@@ -35,7 +35,10 @@ if (usePostgres) {
             console.error('❌ SQLite connection error:', err);
         } else {
             console.log('✅ Connected to SQLite database');
-            initializeSQLite();
+            initializeSQLite().then(() => {
+                sessionDB.cleanupInvalidSessions().catch(err => console.error('Session cleanup error:', err));
+                sessionDB.cleanupExpiredSessions().catch(err => console.error('Session cleanup error:', err));
+            }).catch(err => console.error('SQLite init error:', err));
         }
     });
 }
@@ -66,39 +69,54 @@ function initializePostgres() {
         )`
     ];
 
-    queries.forEach(query => {
-        db.query(query, (err) => {
-            if (err) console.error('PostgreSQL table creation error:', err);
-        });
-    });
+    Promise.all(queries.map(query =>
+        new Promise((resolve, reject) => {
+            db.query(query, (err) => {
+                if (err) {
+                    console.error('PostgreSQL table creation error:', err);
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        })
+    )).then(() => {
+        sessionDB.cleanupInvalidSessions().catch(err => console.error('Session cleanup error:', err));
+        sessionDB.cleanupExpiredSessions().catch(err => console.error('Session cleanup error:', err));
+    }).catch(err => console.error('PostgreSQL init error:', err));
 }
 
 function initializeSQLite() {
-    db.serialize(() => {
-        db.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            email TEXT UNIQUE NOT NULL,
-            password_hash TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.run(`CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            )`);
 
-        db.run(`CREATE TABLE IF NOT EXISTS github_tokens (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            token TEXT NOT NULL,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-            UNIQUE(user_id)
-        )`);
+            db.run(`CREATE TABLE IF NOT EXISTS github_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                token TEXT NOT NULL,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+                UNIQUE(user_id)
+            )`);
 
-        db.run(`CREATE TABLE IF NOT EXISTS sessions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            session_token TEXT UNIQUE NOT NULL,
-            expires_at BIGINT NOT NULL,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        )`);
+            db.run(`CREATE TABLE IF NOT EXISTS sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                session_token TEXT UNIQUE NOT NULL,
+                expires_at BIGINT NOT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+            )`, (err) => {
+                if (err) reject(err);
+                else resolve();
+            });
+        });
     });
 }
 
@@ -341,8 +359,6 @@ const sessionDB = {
     }
 };
 
-// Run cleanup on server start
-sessionDB.cleanupInvalidSessions().catch(err => console.error('Session cleanup error:', err));
-sessionDB.cleanupExpiredSessions().catch(err => console.error('Session cleanup error:', err));
+// Note: cleanup runs after table initialization (see SQLite/Postgres init callbacks above)
 
 module.exports = { db, userDB, tokenDB, sessionDB };
