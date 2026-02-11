@@ -45,9 +45,10 @@ app.use(express.static('src'));
 app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
-        version: '2.0.0-session-fix',
+        version: '2.1.0-postgres',
         timestamp: new Date().toISOString(),
-        sessionFormat: 'unix-timestamp'
+        sessionFormat: 'unix-timestamp',
+        database: process.env.DATABASE_URL ? 'PostgreSQL' : 'SQLite'
     });
 });
 
