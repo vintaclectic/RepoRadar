@@ -14,6 +14,7 @@ const corsOptions = {
             'https://vintaclectic.github.io',
             'https://reporadar.vercel.app',
             'https://reporadar.onrender.com',
+            'https://reporadar-api.onrender.com',
             'http://localhost:5500',
             'http://127.0.0.1:5500'
         ];
